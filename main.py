@@ -1,5 +1,6 @@
 from src.classes_api import HeadHunterAPI
 from src.classes_vacancy import Vacancy, VacancyList
+from src.classes_file_operations import JSONSaver
 
 
 # Создание экземпляра класса для работы с API сайтов с вакансиями
@@ -18,9 +19,11 @@ print(vacancies_list)
 # # Пример работы конструктора класса с одной вакансией
 vacancy = Vacancy.init_vacancy_manual_method("Python Developer", "<https://hh.ru/vacancy/123456>", "100000", "Требования: опыт работы от 3 лет...")
 print(vacancy)
-# # Сохранение информации о вакансиях в файл
-# json_saver = JSONSaver()
-# json_saver.add_vacancy(vacancy)
+# Сохранение информации о вакансиях в файл
+json_saver = JSONSaver()
+
+# json_saver.add_vacancy_to_file(vacancy, 'test')
+json_saver.add_vacancy_list_to_file(vacancies_list, 'test')
 # json_saver.delete_vacancy(vacancy)
 #
 # # Функция для взаимодействия с пользователем

@@ -1,8 +1,6 @@
-
-
-
 class Vacancy:
-    """ Класс создает объект из словаря полученного в результате API запроса, 1 словарь - 1 вакансия"""
+    """ Класс создает объект из словаря полученного в результате API запроса, 1 словарь - 1 вакансия,
+    или введя данные о вакансии в ручном режиме используя метод 'init_vacancy_manual_method' """
     name: str
     url: str
     salary: int
@@ -16,6 +14,7 @@ class Vacancy:
         salary: зарплата
         requirement: краткое описание
         """
+        self.vacancy_id = vacancy_hh.get('id', 'id отсутствует')
         self.name = vacancy_hh.get('name', 'Нет названия вакансии')
         self.url = vacancy_hh.get('alternate_url', 'Нет ссылки на вакансию')
 
@@ -44,8 +43,9 @@ class Vacancy:
             raise ValueError("Некорректные данные для вакансии: нет названия или ссылки")
 
     @staticmethod
-    def init_vacancy_manual_method(name, url, salary, requirement):
+    def init_vacancy_manual_method(name, url, salary, requirement, vacancy_id='Добавлена в ручную'):
         vacancy_dict = dict()
+        vacancy_dict['id'] = vacancy_id
         vacancy_dict['name'] = name
         vacancy_dict['alternate_url'] = url
         vacancy_dict['salary'] = {"from": salary, "to": None}
@@ -81,7 +81,7 @@ class VacancyList:
 
     def add_several_vacancy(self, added_vacancy_list):
         """ Добавляет несколько элементов в список вакансий """
-        if all(isinstance(v, Vacancy) for v in added_vacancy_list):
+        if all(isinstance(vacancy, Vacancy) for vacancy in added_vacancy_list):
             self.vacancy_list.extend(added_vacancy_list)
         else:
             raise TypeError('Все элементы должны быть объектами класса Vacancy')
@@ -90,17 +90,17 @@ class VacancyList:
         """ Добавляет один элемент в список вакансий из элемента json ответа (response[items][i], где i вакансия) """
         added_vacancy = Vacancy(added_vacancy_hh)
         self.vacancy_list.append(added_vacancy)
-        return self.vacancy_list
+        return self
 
     def add_several_vacancy_from_hh(self, added_vacancy_list_hh):
         added_vacancy_list = [Vacancy(v) for v in added_vacancy_list_hh]
         self.vacancy_list.extend(added_vacancy_list)
-        return self.vacancy_list
+        return self
 
-    def add_vacancy_manual_method(self, name, url, salary, requirement):
-        self.vacancy_list.append(Vacancy.init_vacancy_manual_method(name, url, salary, requirement))
+    def add_vacancy_manual_method(self, name, url, salary, requirement, vacancy_id):
+        self.vacancy_list.append(Vacancy.init_vacancy_manual_method(name, url, salary, requirement, vacancy_id))
 
     # Методы сортировки
     def sorted_by_salary(self):
         """ Фильтруем вакансии по зарплате """
-        return sorted(self.vacancy_list, key=lambda v: v["salary"])
+        return sorted(self.vacancy_list, key=lambda v: v.salary)
