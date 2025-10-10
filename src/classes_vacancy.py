@@ -30,34 +30,6 @@ class Vacancy:
         __salary: зарплата
         __requirement: краткое описание
         """
-        # self.vacancy_id = vacancy_hh.get('id', 'id отсутствует')
-        # self.name = vacancy_hh.get('name', 'Нет названия вакансии')
-        # self.url = vacancy_hh.get('alternate_url', 'Нет ссылки на вакансию')
-        #
-        # if vacancy_hh.get('salary'):
-        #     # Если указаны и нижняя, и верхняя граница — получаем среднее значение
-        #     if vacancy_hh.get('salary').get('from') and vacancy_hh.get('salary').get('to'):
-        #         self.salary = (int(vacancy_hh.get('salary')['from']) + int(vacancy_hh.get('salary')['to'])) // 2
-        #     # Если указанна только верхняя используем ее
-        #     elif vacancy_hh.get('salary').get('from'):
-        #         self.salary = int(vacancy_hh.get('salary').get('from'))
-        #     # Если указанна только нижняя используем ее
-        #     elif vacancy_hh.get('salary').get('to'):
-        #         self.salary = int(vacancy_hh.get('salary').get('to'))
-        #     # Иначе 0
-        #     else:
-        #         self.salary = 0
-        # else:
-        #     # Если ключ 'salary' отсутствует — ставим 0
-        #     self.salary = 0
-        #
-        # # Получаем краткое описание вакансии
-        # self.requirement = vacancy_hh.get('snippet', {}).get('requirement', 'Нет данных')
-        #
-        # # Проверяем, что хотя бы название и ссылка есть
-        # if not self.name or not self.url:
-        #     raise ValueError('Некорректные данные для вакансии: нет названия или ссылки')
-
         self.__vacancy_id = vacancy_hh.get('id', 'id отсутствует')
         self.__name = vacancy_hh.get('name', 'Нет названия вакансии')
         self.__url = vacancy_hh.get('alternate_url', 'Нет ссылки на вакансию')
