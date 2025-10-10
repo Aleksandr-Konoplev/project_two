@@ -163,6 +163,6 @@ class VacancyList:
         self.vacancy_list.append(Vacancy.init_vacancy_manual_method(name, url, salary, requirement, vacancy_id))
 
     # Методы сортировки
-    def sorted_by_salary(self):
+    def sorted_by_salary(self, reverse: bool = True):
         """ Фильтруем вакансии по зарплате """
-        return sorted(self.vacancy_list, key=lambda v: v.salary)
+        return sorted(self.vacancy_list, key=lambda v: v.salary, reverse=reverse)

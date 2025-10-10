@@ -3,14 +3,14 @@ from unittest.mock import patch, MagicMock
 from src.classes_api import HeadHunterAPI
 
 
-def test_get_vacancies_success(fake_response_data):
+def test_get_vacancies_success(fixture_response_data):
     """Проверяем корректную работу метода при успешном ответе API."""
 
     with patch('src.classes_api.requests.get') as mock_get:
         # Настраиваем фейковый ответ
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = fake_response_data
+        mock_response.json.return_value = fixture_response_data
         mock_get.return_value = mock_response
 
         api = HeadHunterAPI()
@@ -28,13 +28,13 @@ def test_get_vacancies_success(fake_response_data):
         )
 
 
-def test_get_vacancies_with_area(fake_empty_response):
+def test_get_vacancies_with_area(fixture_empty_response):
     """Проверяем, что параметр area добавляется в запрос."""
 
     with patch('src.classes_api.requests.get') as mock_get:
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = fake_empty_response
+        mock_response.json.return_value = fixture_empty_response
         mock_get.return_value = mock_response
 
         api = HeadHunterAPI()
@@ -46,14 +46,14 @@ def test_get_vacancies_with_area(fake_empty_response):
         )
 
 
-def test_get_vacancies_connection_error(fake_error_response):
+def test_get_vacancies_connection_error(fixture_error_response):
     """Проверяем, что выбрасывается ConnectionError при ответе 500."""
 
     with patch('src.classes_api.requests.get') as mock_get:
         mock_response = MagicMock()
         mock_response.status_code = 500
         mock_response.text = 'Internal Server Error'
-        mock_response.json.return_value = fake_error_response
+        mock_response.json.return_value = fixture_error_response
         mock_get.return_value = mock_response
 
         api = HeadHunterAPI()

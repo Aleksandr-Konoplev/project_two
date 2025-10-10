@@ -23,7 +23,7 @@ class HeadHunterAPI(VacancyAPI):
     BASE_URL = "https://api.hh.ru/vacancies"
 
     def get_vacancies(self, query: str, area: int = None, per_page: int = 5) -> list[dict]:
-        """Метод возвращает список словарей с вакансиями и исключат дополнительную"""
+        """Метод возвращает список словарей с вакансиями и исключат дополнительную информацию"""
 
         params = {
             "text": query,
