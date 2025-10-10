@@ -22,11 +22,11 @@ print(vacancy)
 # Сохранение информации о вакансиях в файл
 json_saver = JSONSaver()
 
-# json_saver.add_vacancy_to_file(vacancy, 'test')
+json_saver.add_vacancy_to_file(vacancy, 'test')
 json_saver.add_vacancy_list_to_file(vacancies_list, 'test')
-# json_saver.delete_vacancy(vacancy)
+json_saver.del_vacancy_from_file(vacancy, 'test')
 #
-# # Функция для взаимодействия с пользователем
+# Функция для взаимодействия с пользователем
 # def user_interaction():
 #     platforms = ["HeadHunter"]
 #     search_query = input("Введите поисковый запрос: ")
@@ -34,6 +34,7 @@ json_saver.add_vacancy_list_to_file(vacancies_list, 'test')
 #     filter_words = input("Введите ключевые слова для фильтрации вакансий: ").split()
 #     salary_range = input("Введите диапазон зарплат: ") # Пример: 100000 - 150000
 #
+#     # Фильтруем вакансии по ключевому слову
 #     filtered_vacancies = filter_vacancies(vacancies_list, filter_words)
 #
 #     ranged_vacancies = get_vacancies_by_salary(filtered_vacancies, salary_range)
