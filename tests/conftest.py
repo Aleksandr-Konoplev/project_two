@@ -1,4 +1,10 @@
+import os
+import tempfile
+
 import pytest
+
+from src.classes_vacancy import Vacancy, VacancyList
+
 
 @pytest.fixture
 def fixture_response_data():
@@ -67,3 +73,33 @@ def fixture_vacancy_data_partial():
         "salary": {"from": 80000, "to": None},
         "snippet": {"requirement": "Знание Python"},
     }
+
+
+@pytest.fixture
+def sample_vacancy():
+    """Создаём тестовый объект вакансии."""
+    return Vacancy.init_vacancy_manual_method(
+        name="Python Developer",
+        url="https://hh.ru/vacancy/123",
+        salary=150000,
+        requirement="Опыт работы с Django"
+    )
+
+
+@pytest.fixture
+def sample_vacancy_list(sample_vacancy):
+    """Создаём объект VacancyList с одной вакансией."""
+    v_list = VacancyList()
+    v_list.add_one_vacancy(sample_vacancy)
+    return v_list
+
+
+@pytest.fixture
+def temp_json_file():
+    """
+    Временный JSON-файл, который создаётся в системной временной папке.
+    После завершения тестов автоматически удаляется.
+    """
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+        yield tmp.name
+    os.remove(tmp.name)  # Удаляем файл после теста

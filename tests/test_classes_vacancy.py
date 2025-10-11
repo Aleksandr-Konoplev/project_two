@@ -1,4 +1,5 @@
 import pytest
+
 from src.classes_vacancy import Vacancy, VacancyList
 
 

@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
-from src.classes_vacancy import Vacancy, VacancyList
 import json
 import os
+from abc import ABC, abstractmethod
 
+from src.classes_vacancy import Vacancy, VacancyList
 
 # Получаем абсолютную ссылку к корню проекта
 folder_data = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '\\data\\'
