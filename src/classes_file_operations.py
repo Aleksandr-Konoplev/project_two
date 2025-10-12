@@ -42,8 +42,13 @@ class ConnectFile(ABC):
 
 class JSONSaver(ConnectFile):
 
-    @staticmethod
-    def save_vacancies_to_file(vacancy_list_obj, file_name):
+    def __init__(self, file_n='vacancy'):
+        if isinstance(file_n, str) and file_n not in ('', ' '):
+            self.__file_name = file_n + '.json'
+        else:
+            self.__file_name = 'vacancy' + '.json'
+
+    def save_vacancies_to_file(self, vacancy_list_obj):
         """ Сохраняет список вакансий (полученный в виде объекта класса VacancyList) в новый файл """
         if isinstance(vacancy_list_obj, VacancyList):
             vacancy_list_dict = []
@@ -56,14 +61,13 @@ class JSONSaver(ConnectFile):
                     'requirement': vacancy.requirement
                 })
 
-            with open(folder_data + file_name, 'w', encoding='utf-8') as f:
+            with open(folder_data + self.__file_name, 'w', encoding='utf-8') as f:
                 json.dump(vacancy_list_dict, f, ensure_ascii=False, indent=4)
 
-    @staticmethod
-    def add_vacancy_to_file(vacancy, file_name):
+    def add_vacancy_to_file(self, vacancy):
         """ Добавляет одну вакансию в файл """
-        if os.path.exists(folder_data + file_name):  # Проверяем существует ли файл
-            with open(folder_data + file_name, 'r', encoding='utf-8') as f:
+        if os.path.exists(folder_data + self.__file_name):  # Проверяем существует ли файл
+            with open(folder_data + self.__file_name, 'r', encoding='utf-8') as f:
                 try:
                     data_file = json.load(f)
                 except json.JSONDecodeError:
@@ -78,14 +82,13 @@ class JSONSaver(ConnectFile):
             'requirement': vacancy.requirement
         })
 
-        with open(folder_data + file_name, 'w', encoding='utf-8') as f:
+        with open(folder_data + self.__file_name, 'w', encoding='utf-8') as f:
             json.dump(data_file, f, ensure_ascii=False, indent=4)
 
-    @staticmethod
-    def add_vacancy_list_to_file(vacancy_list, file_name):
+    def add_vacancy_list_to_file(self, vacancy_list):
         """ Добавляет список вакансий в файл """
-        if os.path.exists(folder_data + file_name):  # Проверяем существует ли файл
-            with open(folder_data + file_name, 'r', encoding='utf-8') as f:
+        if os.path.exists(folder_data + self.__file_name):  # Проверяем существует ли файл
+            with open(folder_data + self.__file_name, 'r', encoding='utf-8') as f:
                 try:
                     data_file = json.load(f)
                 except json.JSONDecodeError:
@@ -103,17 +106,16 @@ class JSONSaver(ConnectFile):
                     'requirement': vacancy.requirement
                 })
 
-        with open(folder_data + file_name, 'w', encoding='utf-8') as f:
+        with open(folder_data + self.__file_name, 'w', encoding='utf-8') as f:
             json.dump(data_file, f, ensure_ascii=False, indent=4)
 
-    @staticmethod
-    def del_vacancy_from_file(vacancy, file_name):
+    def del_vacancy_from_file(self, vacancy):
         """
         Удаляет вакансию из файла, поиск проводится по совпадению ссылки,
         так как вакансия может быть создана вручную и не иметь ID.
         """
         if isinstance(vacancy, Vacancy):
-            file_path = folder_data + file_name
+            file_path = folder_data + self.__file_name
 
             # Проверяем наличие файла
             if not os.path.exists(file_path):
@@ -144,6 +146,10 @@ class JSONSaver(ConnectFile):
 
         else:
             raise TypeError('Удаляемый элемент не принадлежит к классу Vacancy, удаление невозможно')
+
+    def get_file_path(self):
+        """Возвращает полный путь к JSON-файлу"""
+        return os.path.join(folder_data, self.__file_name)
 
     def search_vacancy(self):
         """ Ищет вакансию в файле """

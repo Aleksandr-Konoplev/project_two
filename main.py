@@ -16,7 +16,7 @@ def user_interaction():
 
     # Получаем запрос поиска и количество полученных ответов от HH
     search_query = input('Введите поисковый запрос: ')
-    len_vacancy_api_res = int(input('Введите количество вакансий для получения от HH : '))
+    len_vacancy_api_res = input('Введите количество вакансий для получения от HH : ')
 
     # Создание экземпляра класса для работы с API сайтов с вакансиями
     hh_api = HeadHunterAPI()
@@ -42,7 +42,7 @@ def user_interaction():
         my_vacancy_list = my_vacancy_list.sorted_by_salary(False)
 
     # Получаем количество для вывода результатов и выводим указанное количество вакансий
-    top_n_res = int(input('Введите количество вакансий для вывода: '))
+    top_n_res = input('Введите количество вакансий для вывода: ')
     top_vacancies = my_vacancy_list.get_top_vacancies(top_n_res)
     print(top_vacancies.vacancy_list)
 
@@ -50,8 +50,8 @@ def user_interaction():
     flag_save_json_file = input('Записать результаты работы в файл? Y/N: ').lower()
     if flag_save_json_file == 'y':
         file_name = input('Введите имя файла: ')
-        json_saver = JSONSaver()
-        json_saver.add_vacancy_list_to_file(my_vacancy_list, file_name)
+        json_saver = JSONSaver(file_name)
+        json_saver.add_vacancy_list_to_file(top_vacancies)
         print(f'Данные записаны в файл {file_name}, в папке data')
 
     print('Программа успешно завершила свою работу')

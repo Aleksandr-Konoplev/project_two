@@ -3,12 +3,6 @@ class Vacancy:
     или введя данные о вакансии в ручном режиме используя метод 'init_vacancy_manual_method' """
     __slots__ = ("__vacancy_id", "__name", "__url", "__salary", "__requirement")
 
-    vacancy_id: str
-    name: str
-    url: str
-    salary: int
-    requirement: str
-
     def __init__(self, vacancy_hh: dict):
         """
         Принимает вакансию в виде словаря и инициирует объект с атрибутами
@@ -166,10 +160,15 @@ class VacancyList:
 
     def filter_by_salary(self, salary_range):
         """ Фильтруем вакансии по диапазону зарплаты, если передана одна ЗП отбирает вакансии не ниже этой ЗП """
-        salary_rl = [int(i) for i in salary_range.split('-')]
+        if salary_range in ('', ' '):
+            print('Введен не корректный диапазон зарплат, установлена зп в размере 1')
+            salary_rl = [1]
+        else:
+            salary_rl = [int(i) for i in salary_range.split('-')]
         # Проверяем что все элементы принадлежат типу int и их не более 2
         if not all(isinstance(x, int) for x in salary_rl) or not len(salary_rl) in (1, 2):
-            raise ValueError('Введен не корректный диапазон зарплат')
+            print('Введен не корректный диапазон зарплат, установлена зп в размере 1')
+            salary_rl = [1]
         if len(salary_rl) == 1:
             self.vacancy_list = list(filter(lambda v: salary_rl[0] <= v.salary, self.vacancy_list))
             return self
@@ -179,6 +178,8 @@ class VacancyList:
 
     def filter_by_req(self, filter_words):
         """Фильтрация вакансий по ключевым словам в requirement"""
+        if filter_words in ([], None):
+            return self
         self.vacancy_list = list(
             filter(
                 lambda v: v.requirement and any(word.lower() in v.requirement.lower() for word in filter_words),
@@ -189,5 +190,7 @@ class VacancyList:
 
     def get_top_vacancies(self, top_n):
         """Отбрасывает все вакансии кроме первых top_n"""
+        if not isinstance(top_n, int) or top_n < 1:
+            top_n = 1
         self.vacancy_list = self.vacancy_list[0: top_n]
         return self

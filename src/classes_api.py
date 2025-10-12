@@ -7,7 +7,7 @@ class VacancyAPI(ABC):
     """Абстрактный класс для работы с API сервисов вакансий"""
 
     @abstractmethod
-    def get_vacancies(self, query: str, area: int = None, per_page: int = 10) -> list[dict]:
+    def get_vacancies(self, query: str, area: int|None = None, per_page: int = 10) -> list[dict]:
         """
         Метод для получения вакансий по ключевому слову
         :param query: строка поиска (например, 'Python')
@@ -23,10 +23,15 @@ class HeadHunterAPI(VacancyAPI):
 
     BASE_URL = 'https://api.hh.ru/vacancies'
 
-    def get_vacancies(self, query: str, area: int = None, per_page: int = 10) -> list[dict]:
+    def get_vacancies(self, query: str, area: int|None = None, per_page: str = '10') -> list[dict]:
         """Метод возвращает список словарей с вакансиями и исключат дополнительную информацию"""
 
         # Если количество запрашиваемых вакансий больше 100, или меньше 1: выполняем запрос на 100 вакансий
+        try:
+            per_page = int(per_page)
+        except ValueError:
+            per_page = 50
+
         if per_page > 100 or per_page < 1:
             per_page = 100
 
@@ -37,7 +42,6 @@ class HeadHunterAPI(VacancyAPI):
         }
         if area:
             params['area'] = area
-
 
         # Вызываем приватный метод запроса
         return self.__request_vacancies(params)
