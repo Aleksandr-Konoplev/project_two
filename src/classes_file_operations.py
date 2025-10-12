@@ -28,8 +28,9 @@ class ConnectFile(ABC):
         """ Добавляет список вакансий в файл """
         pass
 
+    @staticmethod
     @abstractmethod
-    def del_vacancy_from_file(self, vacancy, file_name):
+    def del_vacancy_from_file(vacancy, file_name):
         """ Удаляет вакансию из файла """
         pass
 
@@ -105,7 +106,8 @@ class JSONSaver(ConnectFile):
         with open(folder_data + file_name, 'w', encoding='utf-8') as f:
             json.dump(data_file, f, ensure_ascii=False, indent=4)
 
-    def del_vacancy_from_file(self, vacancy, file_name):
+    @staticmethod
+    def del_vacancy_from_file(vacancy, file_name):
         """
         Удаляет вакансию из файла, поиск проводится по совпадению ссылки,
         так как вакансия может быть создана вручную и не иметь ID.

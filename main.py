@@ -54,6 +54,8 @@ def user_interaction():
         json_saver.add_vacancy_list_to_file(my_vacancy_list, file_name)
         print(f'Данные записаны в файл {file_name}, в папке data')
 
+    print('Программа успешно завершила свою работу')
+
 
 if __name__ == '__main__':
     user_interaction()

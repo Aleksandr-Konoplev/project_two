@@ -26,13 +26,24 @@ class HeadHunterAPI(VacancyAPI):
     def get_vacancies(self, query: str, area: int = None, per_page: int = 10) -> list[dict]:
         """Метод возвращает список словарей с вакансиями и исключат дополнительную информацию"""
 
+        # Если количество запрашиваемых вакансий больше 100, или меньше 1: выполняем запрос на 100 вакансий
+        if per_page > 100 or per_page < 1:
+            per_page = 100
+
+        # Формируем параметры
         params = {
             'text': query,
             'per_page': per_page
         }
-
         if area:
             params['area'] = area
+
+
+        # Вызываем приватный метод запроса
+        return self.__request_vacancies(params)
+
+    def __request_vacancies(self, params):
+        """Приватный метод — выполняет запрос к API. Пользователь напрямую его не вызывает."""
 
         response = requests.get(self.BASE_URL, params=params)
 

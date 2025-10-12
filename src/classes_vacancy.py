@@ -1,20 +1,8 @@
-from abc import ABC, abstractmethod
-
-
-class ABCVacancy(ABC):
-    """Абстрактный класс для всех вакансий с разных сайтов."""
-
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def _parse_salary(self, salary_data):
-        pass
-
-
 class Vacancy:
     """ Класс создает объект из словаря полученного в результате API запроса, 1 словарь - 1 вакансия,
     или введя данные о вакансии в ручном режиме используя метод 'init_vacancy_manual_method' """
+    __slots__ = ("__vacancy_id", "__name", "__url", "__salary", "__requirement")
+
     vacancy_id: str
     name: str
     url: str
@@ -132,6 +120,9 @@ class VacancyList:
 
     def __init__(self):
         self.vacancy_list = []
+
+    def __iter__(self):
+        return iter(self.vacancy_list)
 
     # Методы добавления
     def add_one_vacancy(self, vacancy):
