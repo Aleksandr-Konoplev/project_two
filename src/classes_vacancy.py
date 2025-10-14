@@ -15,14 +15,40 @@ class Vacancy:
         self.__vacancy_id = vacancy_hh.get('id', 'id отсутствует')
         self.__name = vacancy_hh.get('name', 'Нет названия вакансии')
         self.__url = vacancy_hh.get('alternate_url', 'Нет ссылки на вакансию')
-        self.__salary = self.__parse_salary(vacancy_hh.get('salary'))  # обрабатываем структуру зарплаты
-        self.__requirement = vacancy_hh.get('snippet', {}).get('requirement', 'Нет данных')
+        self.__salary = self.__parse_salary(vacancy_hh.get('salary'))  # получаем среднюю зп
+        req = vacancy_hh.get('snippet', {}).get('requirement', 'Нет данных')
+        self.__requirement = req if isinstance(req, str) else 'Нет данных'
+
+        self.__validate_data()
+
+    def __validate_data(self):
+        """Приватный метод для валидации данных вакансии"""
+
+        # Проверка ID
+        if not isinstance(self.__vacancy_id, (str, int)):
+            raise TypeError('ID вакансии должно быть строкой или числом')
+
+        # Проверка названия вакансии
+        if not isinstance(self.__name, str):
+            raise ValueError('Название вакансии должно быть непустой строкой')
+
+        # Проверка URL
+        if not isinstance(self.__url, str):
+            raise ValueError('Ссылка на вакансию должна быть строкой и начинаться с http/https')
+
+        # Проверка зарплаты
+        if not isinstance(self.__salary, (int, float)) or self.__salary < 0:
+            raise ValueError('Зарплата должна быть положительным числом')
+
+        # Проверка описания
+        if not isinstance(self.__requirement, str):
+            raise TypeError('Описание вакансии должно быть строкой')
 
     @staticmethod
     def __parse_salary(salary_dict):
         """
         Приватный метод. Принимает словарь salary, который может иметь разную структуру.
-        Возвращает целое число — итоговую зарплату.
+        Возвращает целое число — среднюю зарплату.
         """
         if not salary_dict:
             return 0
