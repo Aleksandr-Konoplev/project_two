@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import requests
 
 
@@ -6,11 +7,11 @@ class VacancyAPI(ABC):
     """Абстрактный класс для работы с API сервисов вакансий"""
 
     def __init__(self, base_url: str, endpoint: str):
-        self.__base_url = base_url  # приватный атрибут
-        self.__endpoint = endpoint  # приватный атрибут
+        self.__base_url = base_url
+        self.__endpoint = endpoint
 
     @abstractmethod
-    def get_vacancies(self, query: str, area: int | None = None, per_page: int = 10) -> list[dict]:
+    def get_vacancies(self, query: str, area: int | None = None, per_page: str | None = '10') -> list[dict]:
         """
         Метод для получения вакансий по ключевому слову
         :param query: строка поиска
@@ -22,23 +23,18 @@ class VacancyAPI(ABC):
 
     def _request(self, params: dict | None = None) -> dict:
         """Универсальный метод запроса к API."""
-
-        url = f'{self.__base_url}{self.__endpoint}'
-        response = requests.get(url, params=params)
-
-        if response.status_code != 200:
-            raise ConnectionError(f'Ошибка запроса: {response.status_code}, {response.text}')
-
-        return response.json()
+        pass
 
 
 class HeadHunterAPI(VacancyAPI):
     """Класс для работы с HeadHunter API"""
 
-    def __init__(self):
-        super().__init__(base_url='https://api.hh.ru', endpoint='/vacancies')
+    def __init__(self, base_url: str = 'https://api.hh.ru', endpoint: str = '/vacancies'):
+        super().__init__(base_url, endpoint)
+        self.__base_url = base_url
+        self.__endpoint = endpoint
 
-    def get_vacancies(self, query: str, area: int | None = None, per_page: int = 10) -> list[dict]:
+    def get_vacancies(self, query: str, area: int | None = None, per_page: str | None = '10') -> list[dict]:
         try:
             per_page = int(per_page)
         except ValueError:
@@ -60,3 +56,14 @@ class HeadHunterAPI(VacancyAPI):
 
         data = self._request(params)
         return data.get('items')
+
+    def _request(self, params: dict | None = None) -> dict:
+        """Универсальный метод запроса к API."""
+
+        url = f'{self.__base_url}{self.__endpoint}'
+        response = requests.get(url, params=params)
+
+        if response.status_code != 200:
+            raise ConnectionError(f'Ошибка запроса: {response.status_code}, {response.text}')
+
+        return response.json()

@@ -14,7 +14,7 @@ def test_get_vacancies_success(fixture_response_data):
         mock_get.return_value = mock_response
 
         api = HeadHunterAPI()
-        result = api.get_vacancies('Python', per_page=2)
+        result = api.get_vacancies('Python', per_page='2')
 
         assert isinstance(result, list)
         assert len(result) == 2
@@ -35,7 +35,7 @@ def test_get_vacancies_with_area(fixture_empty_response):
         mock_get.return_value = mock_response
 
         api = HeadHunterAPI()
-        api.get_vacancies('Python', area=1, per_page=3)
+        api.get_vacancies('Python', area=1, per_page='3')
 
         mock_get.assert_called_once()
         _, called_kwargs = mock_get.call_args
