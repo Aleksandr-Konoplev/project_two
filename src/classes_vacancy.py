@@ -207,6 +207,7 @@ class VacancyList:
         if filter_words in ([], None):
             return self
         self.vacancy_list = list(
+
             filter(
                 lambda v: v.requirement and any(word.lower() in v.requirement.lower() for word in filter_words),
                 self.vacancy_list

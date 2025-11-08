@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import requests
+from typing import Union
 
 
 class VacancyAPI(ABC):
@@ -11,12 +12,14 @@ class VacancyAPI(ABC):
         self.__endpoint = endpoint
 
     @abstractmethod
-    def get_vacancies(self, query: str, area: int | None = None, per_page: str | None = '10') -> list[dict]:
+    def get_vacancies(self, query: str, area: int | None, per_page: str | None,
+                      employer_ids: Union[str, list[str], None]) -> list[dict]:
         """
         Метод для получения вакансий по ключевому слову
         :param query: строка поиска
         :param area: id региона
         :param per_page: количество вакансий на странице
+        :param employer_ids: Список id работодателей
         :return: список словарей с вакансиями
         """
         pass
@@ -34,7 +37,8 @@ class HeadHunterAPI(VacancyAPI):
         self.__base_url = base_url
         self.__endpoint = endpoint
 
-    def get_vacancies(self, query: str, area: int | None = None, per_page: str | None = '10') -> list[dict]:
+    def get_vacancies(self, query: str, area: int | None = 113, per_page: str | None = '10',
+                      employer_ids: Union[str, list[str], None] = None) -> list[dict]:
         try:
             per_page = int(per_page)
         except ValueError:
@@ -48,6 +52,9 @@ class HeadHunterAPI(VacancyAPI):
         }
         if area:
             params['area'] = area
+
+        if employer_ids:
+            params['employer_id'] = employer_ids
 
         return self.__request_vacancies(params=params)
 
@@ -67,3 +74,17 @@ class HeadHunterAPI(VacancyAPI):
             raise ConnectionError(f'Ошибка запроса: {response.status_code}, {response.text}')
 
         return response.json()
+
+
+if __name__ == '__main__':
+    import json
+
+    emp_ids = [
+        '1740', # Яндекс
+        '104628' # Газпром
+    ]
+
+    hh_api = HeadHunterAPI()
+    res = hh_api.get_vacancies('', employer_ids=emp_ids)
+    with open('data.json', 'w', encoding='utf-8') as f:
+        json.dump(res, f, ensure_ascii=False, indent=4)

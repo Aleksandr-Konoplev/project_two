@@ -209,4 +209,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+
+#ignore to develop
 .draft/
+database.ini
