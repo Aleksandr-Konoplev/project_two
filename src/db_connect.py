@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
 import psycopg2
-from psycopg2 import Error, sql
-from typing import Any
+from psycopg2 import Error
 
 
 class AbstractDBM(ABC):
 
-    def __init__(self, conf_db_file: str):
+    @abstractmethod
+    def __init__(self, params, db_name):
         """ Инициация подключения к БД """
-        pass
+        self.db_name = db_name
+        self.params = params
 
     @abstractmethod
     def create_db(self, db_name):
@@ -41,17 +42,17 @@ class AbstractDBM(ABC):
         pass
 
     @abstractmethod
-    def get_avg_salary(self):
+    def get_avg_salary(self, db_name):
         """получает среднюю зарплату по вакансиям"""
         pass
 
     @abstractmethod
-    def get_vacancies_with_higher_salary(self):
+    def get_vacancies_with_higher_salary(self, var_salary):
         """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям"""
         pass
 
     @abstractmethod
-    def get_vacancies_with_keyword(self):
+    def get_vacancies_with_keyword(self, keyword: str):
         """получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python"""
         pass
 
@@ -70,6 +71,7 @@ class DBManager(AbstractDBM):
         :param db_name: имя базы данных для подключения
         """
 
+        super().__init__(params, db_name)
         self.params = params
 
         # Инициализируем соединение и курсор
@@ -145,23 +147,30 @@ class DBManager(AbstractDBM):
         """ Чтение БД """
         pass
 
-    def update_db(self):
-        """ Обновление БД """
-        pass
+    def update_db(self, employers_data: list[dict] | None = None, vacancies_data: list[dict] | None = None):
+        """
+        Универсальное обновление данных в БД:
+        - обновляет таблицу работодателей (employers)
+        - обновляет таблицу вакансий (vacancies)
 
-    def update_employers(self, id_list_emp: list[str], ):
-        """ Обновление таблицы работодателей """
-        for emp in id_list_emp:
-            self.cur.execute(
-                """
-                INSERT INTO employers (employer_id, employer_name, employer_url)
-                VALUES (%s, %s, %s)
-                """,
-                (emp, emp['name'], emp['url'])
-            )
+        :param employers_data: список работодателей (dict с ключами id, name, url)
+        :param vacancies_data: список вакансий (dict с ключами id, name, url, employer_id, area_id, salary)
+        """
+        try:
+            if employers_data:
+                print("Обновляю таблицу работодателей...")
+                self.update_employers(employers_data)
 
+            if vacancies_data:
+                print("Обновляю таблицу вакансий...")
+                self.update_vacancies(vacancies_data)
 
+            self.conn.commit()
+            print("Обновление базы данных завершено успешно.")
 
+        except Error as e:
+            self.conn.rollback()
+            print(f"Ошибка при обновлении базы данных: {e}")
 
     def delete_db(self, db_name: str):
         """Удаление базы данных с отключением всех подключений к ней."""
@@ -191,24 +200,179 @@ class DBManager(AbstractDBM):
         except Error as e:
             print(f'Ошибка при удалении базы данных: {e}')
 
+    def update_employers(self, employers_data: list[dict]):
+        """Обновление таблицы работодателей (вставка или обновление при совпадении ID)."""
+        for emp in employers_data:
+            self.cur.execute(
+                """
+                INSERT INTO employers (employer_id, employer_name, employer_url)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (employer_id) DO UPDATE
+                SET employer_name = EXCLUDED.employer_name,
+                    employer_url = EXCLUDED.employer_url;
+                """,
+                (emp['id'], emp['name'], emp['url'])
+            )
+
+    def update_vacancies(self, vacancies_data: list[dict]):
+        """Обновление таблицы вакансий (вставка или обновление при совпадении ID)."""
+        for vac in vacancies_data:
+            self.cur.execute(
+                """
+                INSERT INTO vacancies (vacancy_id, vacancy_name, vacancy_url, employer_id, area_id, salary)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (vacancy_id) DO UPDATE
+                SET vacancy_name = EXCLUDED.vacancy_name,
+                    vacancy_url = EXCLUDED.vacancy_url,
+                    employer_id = EXCLUDED.employer_id,
+                    area_id = EXCLUDED.area_id,
+                    salary = EXCLUDED.salary;
+                """,
+                (
+                    vac['id'],
+                    vac['name'],
+                    vac['url'],
+                    vac.get('employer', {}).get('id'),
+                    vac.get('area', {}).get('id'),
+                    vac.get('salary', {}).get('from') if vac.get('salary') else None
+                )
+            )
+
     def get_companies_and_vacancies_count(self):
-        """ Получает список всех компаний и количество вакансий у каждой компании """
-        pass
+        """
+        Получает список всех компаний и количество вакансий у каждой компании.
+
+        :return: Список кортежей (employer_name, vacancies_count)
+        """
+        try:
+            self.cur.execute("""
+                SELECT e.employer_name, COUNT(v.vacancy_id) AS vacancies_count
+                FROM employers e
+                LEFT JOIN vacancies v ON e.employer_id = v.employer_id
+                GROUP BY e.employer_name
+                ORDER BY vacancies_count DESC, e.employer_name;
+            """)
+
+            results = self.cur.fetchall()
+
+            if not results:
+                print("В базе данных нет данных о компаниях или вакансиях.")
+                return []
+
+            print(f"Найдено {len(results)} компаний.")
+            return results
+
+        except Error as e:
+            print(f"Ошибка при получении количества вакансий по компаниям: {e}")
+            return []
 
     def get_all_vacancies(self):
-        """получает список всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию"""
-        pass
+        """
+        Получает список всех вакансий с указанием:
+        - названия компании,
+        - названия вакансии,
+        - зарплаты,
+        - ссылки на вакансию.
 
-    def get_avg_salary(self):
-        """получает среднюю зарплату по вакансиям"""
-        pass
+        :return: Список кортежей (employer_name, vacancy_name, salary, vacancy_url)
+        """
+        try:
+            self.cur.execute("""
+                SELECT e.employer_name, v.vacancy_name, v.salary, v.vacancy_url
+                FROM vacancies v
+                JOIN employers e ON v.employer_id = e.employer_id
+                ORDER BY e.employer_name, v.salary DESC NULLS LAST;
+            """)
 
-    def get_vacancies_with_higher_salary(self):
-        """получает список всех вакансий, у которых зарплата выше средней по всем вакансиям"""
-        pass
+            results = self.cur.fetchall()
 
-    def get_vacancies_with_keyword(self):
-        """получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python"""
-        pass
+            if not results:
+                print("В базе данных нет вакансий.")
+                return []
+
+            print(f"Всего найдено {len(results)} вакансий.")
+            return results
+
+        except Error as e:
+            print(f"Ошибка при получении списка всех вакансий: {e}")
+            return []
+
+    def get_avg_salary(self, db_name):
+        """Получает среднюю зарплату по всем вакансиям."""
+        try:
+            self.params['database'] = db_name
+            self.conn = psycopg2.connect(**self.params)
+            self.cur.execute("SELECT AVG(salary) FROM vacancies WHERE salary IS NOT NULL;")
+            avg_salary = self.cur.fetchone()[0]
+
+            if avg_salary is None:
+                print("В базе данных нет данных о зарплате.")
+                return None
+
+            print(f"Средняя зарплата по всем вакансиям: {round(avg_salary)}")
+            return round(avg_salary, 2)
+
+        except Error as e:
+            print(f"Ошибка при получении средней зарплаты: {e}")
+            return None
+
+    def get_vacancies_with_higher_salary(self, var_salary: int | float):
+        """
+        Получает список всех вакансий, у которых зарплата выше переданной.
+        :param var_salary: Зарплата, с которой нужно сравнивать
+        :return: Список кортежей (vacancy_name, employer_name, salary, vacancy_url)
+        """
+        try:
+            self.cur.execute("""
+                SELECT v.vacancy_name, e.employer_name, v.salary, v.vacancy_url
+                FROM vacancies v
+                JOIN employers e ON v.employer_id = e.employer_id
+                WHERE v.salary IS NOT NULL AND v.salary > %s
+                ORDER BY v.salary DESC;
+            """, (var_salary,))
+
+            results = self.cur.fetchall()
+
+            if not results:
+                print(f"Нет вакансий с зарплатой выше {var_salary}.")
+                return []
+
+            print(f"Найдено {len(results)} вакансий с зарплатой выше {var_salary}.")
+            return results
+
+        except Error as e:
+            print(f"Ошибка при получении вакансий с зарплатой выше {var_salary}: {e}")
+            return []
+
+    def get_vacancies_with_keyword(self, keyword: str):
+        """
+        Получает список всех вакансий, в названии которых содержится переданное слово.
+        Поиск нечувствителен к регистру.
+
+        :param keyword: Ключевое слово для поиска (например, 'python')
+        :return: список кортежей (vacancy_name, employer_name, salary, vacancy_url)
+        """
+        try:
+            self.cur.execute("""
+                SELECT v.vacancy_name, e.employer_name, v.salary, v.vacancy_url
+                FROM vacancies v
+                JOIN employers e ON v.employer_id = e.employer_id
+                WHERE LOWER(v.vacancy_name) LIKE %s
+                ORDER BY v.salary DESC NULLS LAST;
+            """, (f"%{keyword.lower()}%",))
+
+            results = self.cur.fetchall()
+
+            if not results:
+                print(f'Вакансий с ключевым словом "{keyword}" не найдено.')
+                return []
+
+            print(f'Найдено {len(results)} вакансий, содержащих "{keyword}".')
+            return results
+
+        except Error as e:
+            print(f'Ошибка при поиске вакансий с ключевым словом "{keyword}": {e}')
+            return []
+
         
 

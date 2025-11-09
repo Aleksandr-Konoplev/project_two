@@ -58,16 +58,37 @@ class HeadHunterAPI(VacancyAPI):
 
         return self.__request_vacancies(params=params)
 
+    def get_employer_by_id(self, employer_ids: list[str]) -> list[dict]:
+        """ Метод запроса информации о работодателе """
+
+        result = []
+
+        for emp_id in employer_ids:
+
+            url = f'{self.__base_url}/employers/{emp_id}'
+            data = self._request(url=url)
+            result.append({
+                'id': emp_id,
+                'name': data['name'],
+                'url': data['alternate_url']
+            })
+        return result
+        # url = f'{self.__base_url}/employers/{employer_ids}'
+        # data = self._request(url=url)
+        # return data
+
     def __request_vacancies(self, params):
         """Приватный метод — выполняет запрос к API. Пользователь напрямую его не вызывает."""
 
         data = self._request(params)
         return data.get('items')
 
-    def _request(self, params: dict | None = None) -> dict:
+    def _request(self, params: dict | None = None, url: str | None = None) -> dict:
         """Универсальный метод запроса к API."""
 
-        url = f'{self.__base_url}{self.__endpoint}'
+        if not url:
+            url = f'{self.__base_url}{self.__endpoint}'
+
         response = requests.get(url, params=params)
 
         if response.status_code != 200:

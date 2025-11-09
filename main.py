@@ -91,14 +91,45 @@ my_emp = [
 def main():
     hh_api = HeadHunterAPI()
 
+    # Получаем данные о работодателе
+    data_employers = hh_api.get_employer_by_id(my_emp)
+
+    # Получаем данные по вакансиям
     data_vacancies = hh_api.get_vacancies('', employer_ids=my_emp, per_page='100')
 
-
+    # Создаем объект класса подключения к БД
     db_connect = DBManager(params)
+
+    # Создаем новую БД
     db_connect.create_db(name_db)
 
+    # Заполняем таблицы
+    db_connect.update_db(employers_data=data_employers, vacancies_data=data_vacancies)
+
+    # Подключаемся к новой БД, изменив параметры
+    params['database'] = name_db
+    db_connect = DBManager(params)
+
+    # Получаем среднюю зарплату
+    avg_salary = db_connect.get_avg_salary(name_db)
+    # Получаем список вакансий с зарплатой выше указанной
+    list_vac_filtered_salary = db_connect.get_vacancies_with_higher_salary(avg_salary)
+    # Выводим полученный список
+    print(json.dumps(list_vac_filtered_salary, indent=4, ensure_ascii=False))
+
+    # Получаем вакансии по ключевому слову
+    list_vac_filtered_keyword = db_connect.get_vacancies_with_keyword('Специалист')
+    # Выводим полученные вакансии
+    print(json.dumps(list_vac_filtered_keyword, indent=4, ensure_ascii=False))
+
+    # Получаем все вакансии с названием компании
+    list_vac_all = db_connect.get_all_vacancies()
+    # Выводим все вакансии с названием компании
+    print(json.dumps(list_vac_all, indent=4, ensure_ascii=False))
 
 
+    list_count_vac_emp = db_connect.get_companies_and_vacancies_count()
+    print(json.dumps(list_count_vac_emp, indent=4, ensure_ascii=False))
 
 
 if __name__ == '__main__':
