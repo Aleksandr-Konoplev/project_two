@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Union
 
 import requests
-from typing import Union
 
 
 class VacancyAPI(ABC):
@@ -101,8 +101,8 @@ if __name__ == '__main__':
     import json
 
     emp_ids = [
-        '1740', # Яндекс
-        '104628' # Газпром
+        '1740',  # Яндекс
+        '104628'  # Газпром
     ]
 
     hh_api = HeadHunterAPI()

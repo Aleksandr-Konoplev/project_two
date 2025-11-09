@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 import psycopg2
 from psycopg2 import Error
 
@@ -38,7 +39,7 @@ class AbstractDBM(ABC):
 
     @abstractmethod
     def get_all_vacancies(self):
-        """получает список всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию"""
+        """получает список всех вакансий с указанием компании, названия вакансии и зарплаты и ссылки на вакансию"""
         pass
 
     @abstractmethod
@@ -183,7 +184,7 @@ class DBManager(AbstractDBM):
             cur = conn.cursor()
 
             # Завершаем все активные соединения с целевой базой
-            cur.execute(f"""
+            cur.execute("""
                 SELECT pg_terminate_backend(pid)
                 FROM pg_stat_activity
                 WHERE datname = %s
@@ -373,6 +374,3 @@ class DBManager(AbstractDBM):
         except Error as e:
             print(f'Ошибка при поиске вакансий с ключевым словом "{keyword}": {e}')
             return []
-
-        
-

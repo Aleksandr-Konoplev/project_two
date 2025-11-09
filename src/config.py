@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 
+
 def config(filename: str, section: str = 'postgresql'):
     parser = ConfigParser()
     with open(filename, encoding='cp1251') as f:
@@ -14,4 +15,3 @@ def config(filename: str, section: str = 'postgresql'):
         raise Exception(f'Section {section} not found in the {filename} file')
 
     return db
-
