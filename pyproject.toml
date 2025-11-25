@@ -2,11 +2,13 @@
 name = "project-two"
 version = "0.1.0"
 description = ""
-authors = ["Aleksandr Komoplev <konoplev.a.a0000@gmail.com>"]
+authors = ["Aleksandr Konoplev <konoplev.a.a0000@gmail.com>"]
 readme = "README.md"
+packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"
+requests = "^2.32.5"
 
 
 [tool.poetry.group.lint.dependencies]
